@@ -16,7 +16,7 @@
 
 ### 🏠 [Authing 身份认证云](https://authing.cn)
 
-### ✨ [本 Demo 在线地址](https://sample.authing.cn/aws/)
+### ✨ [本 Demo 在线地址](https://sample.authing.cn/aws-demo/)
 
 ## Install
 
@@ -128,7 +128,7 @@ role rermissions 如下：
 
 ![](http://lcjim-img.oss-cn-beijing.aliyuncs.com/2019-12-18-182542.png)
 
-可以通过 [https://sample.authing.cn/aws/](https://sample.authing.cn/aws/) 访问在线 Demo
+可以通过 [https://sample.authing.cn/aws-demo/](https://sample.authing.cn/aws-demo/) 访问在线 Demo
 
 ## Author
 
