@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <link rel="shortcut icon" href=https://fe-static.authing.cn/dist/favicon.png type=image/png>
+    <title>Authing 集成 AWS Demo</title>
+    <style>
+        body {
+            font-family: Avenir, Helvetica, Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-align: center;
+            color: #2c3e50;
+            margin-top: 60px;
+        }
+
+        a {
+            color: #42b983;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        ul {
+            list-style-type: none
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css" />
+
+</head>
+
+<body>
+    <div style="margin-bottom:22px">
+        <img data-v-1129b33e="" alt="Vue logo" height="80" src="https://cdn.authing.cn/authing-logo@2.png">
+        <h1>Authing 集成 AWS Demo</h1>
+        <h2>当前状态：<span id="status">检测中</span></h2>
+        <div id="objectsContainer">
+            <h3>我的 S3 Bucket 文件列表</h3>
+            <input type="file" placeholder="上传文件" id="fileupload">
+            <ul id="objectList">
+
+            </ul>
+        </div>
+    </div>
+    <a id="btn-login">使用 Authing 登录</a>
+    <br>
+    <a id="btn-logout">退出</a>
+</body>
+
+<script src="https://cdn.jsdelivr.net/npm/@authing/sso/dist/AuthingSSO.umd.min.js"></script>
+<script src="https://cdn.authing.cn/js-beautify/1.7.5/beautify.min.js"></script>
+<script src="https://sdk.amazonaws.com/js/aws-sdk-2.283.1.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.1/jquery.min.js"></script>
+
+<script>
+    const region = 'cn-north-1'
+    const IdentityPoolId = "cn-north-1:92e3b4b3-407c-481f-bb4a-ebea00c36d72"
+    const Bucket = "authing-aws-demo"
+    AWS.config.region = region; // 区域
+    AWS.config.credentials = new AWS.CognitoIdentityCredentials({
+        IdentityPoolId,
+    });
+    const cognitoIdentity = new AWS.CognitoIdentity({ apiVersion: '2014-06-30' });
+
+    async function getIdentityIdAndS3Credentials(authingUserId) {
+        try {
+            const { IdentityId, Token } = await cognitoIdentity.getOpenIdTokenForDeveloperIdentity({
+                IdentityPoolId, /* required */
+                Logins: {
+                    'aws-demo.authing.cn': authingUserId
+                },
+                TokenDuration: 3600
+            }).promise()
+
+            try {
+                const { Credentials } = await cognitoIdentity.getCredentialsForIdentity({
+                    IdentityId: IdentityId, /* required */
+                    Logins: {
+                        'cognito-identity.cn-north-1.amazonaws.com.cn': Token
+                    }
+                }).promise()
+                return {
+                    IdentityId,
+                    credentials: {
+                        accessKeyId: Credentials.AccessKeyId,
+                        secretAccessKey: Credentials.SecretKey,
+                        sessionToken: Credentials.SessionToken
+                    }
+                }
+            } catch (e) {
+                console.log(e)
+            }
+        } catch (e) {
+            console.log(e)
+        }
+    }
+
+    async function putObject(authingUserId) {
+        const { IdentityId, credentials } = await getIdentityIdAndS3Credentials(authingUserId)
+        const files = document.getElementById("fileupload").files;
+        if (!files.length) {
+            return alert("Please choose a file to upload first.");
+        }
+        const file = files[0];
+
+        // init s3
+        const s3 = new AWS.S3(credentials)
+        const Key = `users/${IdentityId}/${file.name}`
+        const url = s3.endpoint.href + Key
+        try {
+            const data = await s3.putObject({
+                Body: file,
+                Bucket,
+                Key,
+                ContentType: file.type
+            }).promise()
+            console.log(`Succeefully uploaded to ${url}`)
+            listObjects(authingUserId)
+        } catch (e) {
+            console.log(e)
+        }
+    }
+
+    async function listObjects(authingUserId) {
+        const { IdentityId, credentials } = await getIdentityIdAndS3Credentials(authingUserId)
+        const s3 = new AWS.S3(credentials)
+        const Prefix = `users/${IdentityId}`
+        try {
+            const data = await s3.listObjects({
+                Bucket,
+                Prefix
+            }).promise()
+            const Contents = data.Contents
+            $("#objectList").html("")
+            for (let i = 0; i < Contents.length; i++) {
+                const Key = Contents[i].Key
+                s3.getSignedUrl('getObject', {
+                    Bucket,
+                    Key,
+                }, function (err, url) {
+                    $("#objectList").append(`<li><a href="${url}" target="_blank">${Key}</a></li>`)
+                });
+
+            }
+        } catch (e) {
+            console.log(e)
+        }
+    }
+</script>
+
+<script>
+
+    const authing = new AuthingSSO({
+        appId: "5dfa6fd7673d476b4be1e306", // OIDC 应用的 ID
+        appDomain: "aws-demo.authing.cn"
+    });
+
+    const callTrackSession = async function () {
+        const res = await authing.trackSession();
+        if (!res.session) {
+            status.innerHTML = '未登录';
+            logout.setAttribute('style', 'display:none');
+            objectsContainer.setAttribute('style', 'display:none')
+        } else {
+            status.innerHTML = `${res.userInfo.username || res.userInfo.email || res.userInfo.nickname} 你好，你已处于登录状态`;
+            login.setAttribute('style', 'display:none');
+            const userId = res.userInfo._id
+            listObjects(userId)
+            $("#fileupload").on('change', function () {
+                putObject(userId)
+            })
+        }
+    };
+
+    // 检查登录状态
+    callTrackSession()
+
+    const login = document.getElementById('btn-login');
+    const logout = document.getElementById('btn-logout');
+    const status = document.getElementById('status');
+    const objectsContainer = document.getElementById('objectsContainer');
+
+    login.onclick = function () {
+        authing.login();
+    };
+
+    logout.onclick = async function () {
+        let res = await authing.logout();
+        alert(JSON.stringify(res));
+        location.reload();
+    };
+</script>
+
+</html>
