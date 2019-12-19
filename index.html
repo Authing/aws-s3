@@ -36,7 +36,8 @@
         <img data-v-1129b33e="" alt="Vue logo" height="80" src="https://cdn.authing.cn/authing-logo@2.png">
         <h1>Authing 集成 AWS Demo</h1>
         <h2>当前状态：<span id="status">检测中</span></h2>
-        <h3>我的 Cognito Identity ID：<span id="identityId"></span> </h3>
+        <h3 id="authingUserIdContainer">我的 Authing User ID：<span id="authingUserId"></span> </h3>
+        <h3 id="identityIdContainer">我的 Cognito Identity ID：<span id="identityId"></span> </h3>
         <div id="objectsContainer">
             <h3>我的 S3 Bucket 文件列表</h3>
             <input type="file" placeholder="上传文件" id="fileupload">
@@ -167,10 +168,14 @@
             status.innerHTML = '未登录';
             logout.setAttribute('style', 'display:none');
             objectsContainer.setAttribute('style', 'display:none')
+            authingUserIdContainer.setAttribute('style', 'display:none')
+            identityIdContainer.setAttribute('style', 'display:none')
+            
         } else {
             status.innerHTML = `${res.userInfo.username || res.userInfo.email || res.userInfo.nickname} 你好，你已处于登录状态`;
             login.setAttribute('style', 'display:none');
             const userId = res.userInfo._id
+            document.getElementById('authingUserId').innerHTML = userId
             listObjects(userId)
             $("#fileupload").on('change', function () {
                 putObject(userId)
@@ -185,6 +190,8 @@
     const logout = document.getElementById('btn-logout');
     const status = document.getElementById('status');
     const objectsContainer = document.getElementById('objectsContainer');
+    const authingUserIdContainer = document.getElementById('authingUserIdContainer')
+    const identityIdContainer = document.getElementById('identityIdContainer')
 
     login.onclick = function () {
         authing.login();
