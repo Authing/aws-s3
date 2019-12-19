@@ -36,6 +36,7 @@
         <img data-v-1129b33e="" alt="Vue logo" height="80" src="https://cdn.authing.cn/authing-logo@2.png">
         <h1>Authing 集成 AWS Demo</h1>
         <h2>当前状态：<span id="status">检测中</span></h2>
+        <h3>我的 Cognito Identity ID：<span id="identityId"></span> </h3>
         <div id="objectsContainer">
             <h3>我的 S3 Bucket 文件列表</h3>
             <input type="file" placeholder="上传文件" id="fileupload">
@@ -81,6 +82,9 @@
                         'cognito-identity.cn-north-1.amazonaws.com.cn': Token
                     }
                 }).promise()
+
+                document.getElementById("identityId").innerHTML = IdentityId
+
                 return {
                     IdentityId,
                     credentials: {
