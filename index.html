@@ -49,6 +49,17 @@
     <a id="btn-login">使用 Authing 登录</a>
     <br>
     <a id="btn-logout">退出</a>
+
+    <br>
+    <p>使用 Authing</p>
+    <a href="https://authing.cn/" target="_blank">Authing 官网</a>
+    <a href="https://docs.authing.cn/" target="_blank">Authing 官方文档</a>
+    <br>
+    <p>Authing & AWS</p>
+    <a href="https://github.com/Authing/aws-s3" target="_blank" style="margin-left:11px">本 Demo示例代码</a>
+    <a href="https://mp.weixin.qq.com/s/G8Hdf7O4_h48mk5PkbkOxA" target="_blank" style="margin-left:11px">使用 Authing 快速集成
+        AWS 服务
+    </a>
 </body>
 
 <script src="https://cdn.jsdelivr.net/npm/@authing/sso/dist/AuthingSSO.umd.min.js"></script>
@@ -170,7 +181,7 @@
             objectsContainer.setAttribute('style', 'display:none')
             authingUserIdContainer.setAttribute('style', 'display:none')
             identityIdContainer.setAttribute('style', 'display:none')
-            
+
         } else {
             status.innerHTML = `${res.userInfo.username || res.userInfo.email || res.userInfo.nickname} 你好，你已处于登录状态`;
             login.setAttribute('style', 'display:none');
