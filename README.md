@@ -1,22 +1,21 @@
-<h1 align="center">Welcome to authing-aws-demo 👋</h1>
-<p>
-  <img alt="Version" src="https://img.shields.io/badge/version-1.0.0-blue.svg?cacheSeconds=2592000" />
-  <a href="https://github.com/Authing/aws" target="_blank">
-    <img alt="Documentation" src="https://img.shields.io/badge/documentation-yes-brightgreen.svg" />
-  </a>
-  <a href="#" target="_blank">
-    <img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-yellow.svg" />
-  </a>
-  <a href="https://twitter.com/liaochangjiang" target="_blank">
-    <img alt="Twitter: liaochangjiang" src="https://img.shields.io/twitter/follow/liaochangjiang.svg?style=social" />
-  </a>
-</p>
+# Authing - aws-s3-demo
+<div align=center>
+  <img width="250" src="https://files.authing.co/authing-console/authing-logo-new-20210924.svg" />
+</div>
 
-> Authing 集 成AWS 服务 DEMO
+<div align="center">
+    <a href="https://forum.authing.cn/" target="_blank"><img src="https://img.shields.io/badge/chat-forum-blue" /></a>
+    <a href="https://opensource.org/licenses/MIT" target="_blank"><img src="https://img.shields.io/badge/License-MIT-success" alt="License"></a>
+</div>
 
-### 🏠 [Authing 身份认证云](https://authing.cn)
+**English** | [简体中文](./README.zh_CN.md)
 
-### ✨ [本 Demo 在线地址](https://sample.authing.cn/aws-demo/)
+## Introduction
+Authing Integration with AWS Services DEMO
+
+## Reference
+- [Authing](https://authing.cn)
+- [Demo online address](https://sample.authing.cn/aws-demo/)
 
 ## Install
 
@@ -30,59 +29,59 @@ yarn install
 node index.js
 ```
 
-## 使用 Authing 集成 AWS 服务
+## Integrating AWS Services with Authing
 
-Authing 是一个开发者友好、拓展性极高的身份认证云服务，每月有超过 100 万次用户被 Authing 认证和授权。本次分享将介绍如何企业常见的认证授权场景，可以满足中国本地用户对于 Cognito User Pool 的需求，并且提供本地化的服务。同时 Authing 本文将讲解 Authing 如何与 AWS Cognito Identity Pool 集成，并提供一个使用 S3 资源的 Demo。
+Authing is a developer-friendly, highly scalable identity cloud service with over 1 million users authenticated and authorized by Authing every month. This sharing will introduce how common enterprise authentication and authorization scenarios can meet the needs of local Chinese users for Cognito User Pool and provide localized services. At the same time, Authing will explain how Authing integrates with AWS Cognito Identity Pool and provide a demo of using S3 resources.
 
 ### Cognito Identity Pool
 
-Cognito User Pool 负责认证。终端用户可以通过 user pool 完成注册登录流程。
+The Cognito User Pool is responsible for authentication. End-users can complete the registration and login process through the user pool.
 
-Cognito Identity Pool 负责授权（访问控制），将使用 AWS 资源的权利授权给终端用户。
+The Cognito Identity Pool is responsible for authorization (access control), granting the right to use AWS resources to end users.
 
-Amazon Web Services(AWS) 虽然作为市场份额全球第一的云计算厂商，其产品也不是完美无缺的，Cognito （AWS 的身份认证解决方案）及其附带的中文文档就是一个反面教材，其难用程度令人发指。当然，除了不易用之外，还有访问速度缓慢，不适用于中国市场等问题存在。
+Although Amazon Web Services (AWS) is the world's number one cloud computing vendor in terms of market share, its products are not flawless, and Cognito (AWS's authentication solution) and its accompanying Chinese documentation is a counterfactual. Of course, in addition to not being easy to use, there are also problems such as slow access speeds and inapplicability to the Chinese market.
 
-而国产的 Authing 可以解决使用 Cognito 的诸多问题，使用 Authing User Pool， 可以替代 Cognito User Pool，构建起国内用户与 AWS 资源之间的桥梁。
+The Authing User Pool can replace the Cognito User Pool and build a bridge between domestic users and AWS resources.
 
-在创建 AWS Identity Pool 时，可以配置自定义 Authentication providers，这里我们将 Developer provider name 设置为 `<authing-userpool-id>.authing.cn`  格式：
+When creating an AWS Identity Pool, you can configure custom Authentication providers, here we set the Developer provider name to `<authing-userpool-id>.authing.cn` format.
 
 ![](http://lcjim-img.oss-cn-beijing.aliyuncs.com/2019-12-18-181525.jpg)
 
 ![](http://lcjim-img.oss-cn-beijing.aliyuncs.com/2019-12-18-181549.jpg)
 
-整个流程中一共有三方参与：终端用户、Authing 、AWS，具体过程如下：
-- 终端用户使用 Authing 用户池完成认证
-- Authing 开发者在服务端调用 AWS 的 GetOpenIdTokenForDeveloperIdentity 接口，获得 IdentityId 和 Token。
-- 终端用户调用 GetCredentialsForIdentity 使用 token 换取访问 AWS 资源所需的 credentials。
+There are three parties involved in the entire process: the end user, Authing, and AWS, and the process is as follows.
+- End-user authentication is done using the Authing user pool
+- Authing developers call AWS' GetOpenIdTokenForDeveloperIdentity interface on the server side to get the IdentityId and Token.
+- The end user calls GetCredentialsForIdentity to exchange tokens for the credentials needed to access AWS resources.
 
-GetOpenIdTokenForDeveloperIdentity 需要以下参数：
-- IdentityPoolId：你的 AWS Identity Pool ID。
-- Logins：一组 provider name 到 provider tokens 的映射，provider token 可以任意可以区分用户的字符串，比如 Authing 用户池用户 ID。
+GetOpenIdTokenForDeveloperIdentity requires the following parameters.
+- IdentityPoolId：Your AWS Identity Pool ID.
+- Logins：A set of provider name to provider tokens mapping, provider token can be any string that can distinguish users, such as Authing user pool user ID.
 "Logins": {
-    "<authing-userpool-id>.authing.cn": "5ccb24701bbaf00d50ced851" // Authing 用户池 ID
+    "<authing-userpool-id>.authing.cn": "5ccb24701bbaf00d50ced851" // Authing userpool ID
 }
 
-我们能从请求返回数据中 获得 IdentityId 和 Token。这样，我们就在 Authing 用户池用户 和 Cognito Identity ID 之间构建起了联系。接着可以使用 GetCredentialsForIdentity 获取 credentials，从而访问相关资源。
+We can get the IdentityId and Token from the request return data, so we have a link between the Authing user pool user and the Cognito Identity ID. We can then use GetCredentialsForIdentity to get credentials to access the relevant resources.
 
 ### IAM
 
-IAM(Identity and Access Management) 管理 Users、Groups、 Roles 对 AWS 资源的访问权限，通过给 Role 添加相关权限，达到使用相关 AWS 资源的目的。
+IAM (Identity and Access Management) manages the access rights of Users, Groups, and Roles to AWS resources by adding related rights to Roles for the purpose of using related AWS resources.
 
-例如，新建 Cognito Identity Pool 的时候，会默认创建两个 role：
+For example, when a new Cognito Identity Pool is created, two roles are created by default.
 
 ![](http://lcjim-img.oss-cn-beijing.aliyuncs.com/2019-12-18-181645.jpg)
 
-可以给此 role 添加相关权限，比如：
+Permissions can be added to this role, e.g.
 
 ![](http://lcjim-img.oss-cn-beijing.aliyuncs.com/2019-12-18-181702.jpg)
 
-通过集成 Authing 与 Cognito Identity Pool，我们在 Authing User ID 与 Cognito Identity ID 之间构建起了映射关系。而每个 Identity ID，可以拥有不同的 Role。不同的 Role，具备不同的 AWS 资源访问权限。这也就将 Authing 和 AWS 的各种服务结合了起来。
+By integrating Authing with the Cognito Identity Pool, we build a mapping between Authing User IDs and Cognito Identity IDs. Each Identity ID can have a different Role, and each Role has different access to AWS resources. This also combines Authing with AWS services.
 
 ### S3（Simple Storage Service）
 
-下面举一个具体的例子：用户使用 Authing 登录之后，会得到一个唯一的 Authing User ID，通过 `GetOpenIdTokenForDeveloperIdentity`，将 Authing User ID 与 Cognito Identity ID 对应起来。通过以下 role permissions 以及 bucket policy，实现每个 Authing 用户能且仅能对 `users/<cognito-identity-id>` 目录的文件进行增删改查操作。
+Here is a concrete example: after a user logs in with Authing, he/she will get a unique Authing User ID, and the Authing User ID will be matched with the Cognito Identity ID by `GetOpenIdTokenForDeveloperIdentity`. With the following role permissions and bucket policy, each Authing user can add, delete, and check only files in the `users/<cognito-identity-id>` directory.
 
-Bucket Policy 如下：
+The Bucket Policy is as follows.
 ```json
 {
     "Version": "2012-10-17",
@@ -118,27 +117,36 @@ Bucket Policy 如下：
 }
 ```
 
-role rermissions 如下：
+The role rermissions are as follows.
 
 ![](http://lcjim-img.oss-cn-beijing.aliyuncs.com/2019-12-18-182358.png)
 
-效果截图：
+Screenshot of the effect.
 
-点击文件上传可以上传文件到个人的特定文件夹。
+Clicking File Upload allows you to upload files to a specific folder for an individual.
 
 ![](http://lcjim-img.oss-cn-beijing.aliyuncs.com/2019-12-18-182542.png)
 
-可以通过 [https://sample.authing.cn/aws-demo/](https://sample.authing.cn/aws-demo/) 访问在线 Demo
+The online demo can be accessed at [https://sample.authing.cn/aws-demo/](https://sample.authing.cn/aws-demo/)
 
-## Author
+## Questions
 
-👤 **liaochangjiang**
+For questions and support please use the [official forum](https://forum.authing.cn/). The issue list of this repo is exclusively for bug reports and feature requests.
 
-* Website: authing.cn
-* Twitter: [@liaochangjiang](https://twitter.com/liaochangjiang)
-* Github: [@liaochangjiang](https://github.com/liaochangjiang)
+## Contribution
 
-## Show your support
+- Fork it
+- Create your feature branch (git checkout -b my-new-feature)
+- Commit your changes (git commit -am 'Add some feature')
+- Push to the branch (git push -u origin my-new-feature)
+- Create new Pull Request
+## Contribute
 
-Give a ⭐️ if this project helped you!
+https://github.com/Authing/.github/blob/main/CONTRIBUTING.md#English
 
+
+## License
+
+[MIT](https://opensource.org/licenses/MIT)
+
+Copyright (c) 2019-present, Authing
